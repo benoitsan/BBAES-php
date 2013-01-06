@@ -24,12 +24,16 @@ Install first [composer](http://getcomposer.org/). Create the following `compose
 ```
 
 ``` php
-<?
+<?php
 require 'vendor/autoload.php';
 
-use benoitsan\AES;
+use benoitsan\AES\AES;
 
-printf(bin2hex(AES::saltPassword('password', AES::salt())));
+$key = AES::saltPassword('password', AES::salt());
+$encrypted = AES::encrypt('message', $key);
+printf('encrypted: ' . $encrypted . "<br/>");
+$decrypted = AES::decrypt($encrypted, $key);
+printf('decrypted: ' . $decrypted);
 ```
 
 ### Without Composer
@@ -40,9 +44,13 @@ Save the file `AES.php` into your project path somewhere.
 <?php
 require 'path/to/AES.php';
 
-use benoitsan\AES;
+use benoitsan\AES\AES;
 
-printf(bin2hex(AES::saltPassword('password', AES::salt())));
+$key = AES::saltPassword('password', AES::salt());
+$encrypted = AES::encrypt('message', $key);
+printf('encrypted: ' . $encrypted . "<br/>");
+$decrypted = AES::decrypt($encrypted, $key);
+printf('decrypted: ' . $decrypted);
 ```
 
 ## Documentation
