@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="src/benoitsan/AES/Tests/bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="Configurator Test Suite">
+            <directory>src/benoitsan/AES/Tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
