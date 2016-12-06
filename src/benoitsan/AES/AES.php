@@ -49,9 +49,14 @@ class AES
      */
 	public static function salt($length = self::SALT_DEFAULT_SIZE)
 	{
-		$salt = mcrypt_create_iv($length, self::randomizer());
-
-		return $salt;
+		$salt = openssl_random_pseudo_bytes($length, $strong);
+    
+        if ($strong === true) {
+            return $salt;
+        }
+        else {
+        	throw new \InvalidArgumentException('OpenSSL could not generate a safe salt.');
+        }
 	}
 	
 	/**
@@ -101,23 +106,22 @@ class AES
 	public static function encrypt($string, $key, $iv = null) 
 	{
 	    if ($iv === null) {
-	    	$iv = mcrypt_create_iv(self::IV_SIZE, self::randomizer());
+	    	$iv = self::salt(self::IV_SIZE);
 	    }
 	    else {
 	    	$iv = hash('MD5', $iv, true);
 	    }
-	    
+
 	    /*
 	    echo("data " . bin2hex($string)); echo("<br/>");
 	    echo("key" . bin2hex($key)); echo("<br/>");
 	    echo("iv " . bin2hex($iv));
 		*/
-		
-		$pad = self::IV_SIZE - (strlen($string) % self::IV_SIZE);
-		$paddedData = $string . str_repeat(chr($pad), $pad);
-				
-		$encryptedData = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $paddedData, MCRYPT_MODE_CBC, $iv);
-		
+
+		$method = self::cipherMethod(mb_strlen($key, '8bit'));
+
+		$encryptedData = openssl_encrypt($string, $method, $key, OPENSSL_RAW_DATA, $iv);
+
 		return base64_encode($iv . $encryptedData);
 	}
 	
@@ -135,33 +139,30 @@ class AES
 		$iv = substr($data, 0, self::IV_SIZE);
 		$data = substr($data, self::IV_SIZE);
 
-		$decryptedData = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
+		$method = self::cipherMethod(mb_strlen($key, '8bit'));
 
-		$pad = ord($decryptedData[($length = strlen($decryptedData)) - 1]);
-		if ($pad and $pad < self::IV_SIZE) {
-			$unpadData = substr($decryptedData, 0, $length - $pad);
-		}
-		else {
-			$unpadData = $decryptedData;
-		}
-		return $unpadData;
+		$decryptedData = openssl_decrypt($data, $method, $key, OPENSSL_RAW_DATA, $iv);
+
+		return $decryptedData;
 	}
-	
-	
-	protected static function randomizer()
+
+	protected static function cipherMethod($keyLength)
 	{
-		if (defined('MCRYPT_DEV_URANDOM')) {
-			return MCRYPT_DEV_URANDOM;
-		}
-		elseif (defined('MCRYPT_DEV_RANDOM')){
-			return MCRYPT_DEV_RANDOM;
-		}
-		else {
-			mt_srand();
-			return MCRYPT_RAND;
+		switch ($keyLength) {
+			case 16:
+			return 'aes-128-cbc';
+
+			case 24:
+			return 'aes-192-cbc';
+
+			case 32:
+			return 'aes-256-cbc';
+
+			default:
+			throw new \InvalidArgumentException('The key size is not compatible.');
 		}
 	}
-		
+
 	protected static function PBKDF2Hash($password, $salt, $length, $iterations) //PBKDF2-HMAC-SHA1
 	{
 		$config = array(
