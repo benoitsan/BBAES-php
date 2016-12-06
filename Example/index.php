@@ -1,10 +1,10 @@
 <?php
 
-namespace benoitsan\AES\Example;
+namespace AES\Example;
 
-require __DIR__ . '/../AES.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-use benoitsan\AES\AES;
+use AES\AES;
 
 $password = 'Passwôrd';
 $message = 'Messâge';

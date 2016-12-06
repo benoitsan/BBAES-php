@@ -1,6 +1,6 @@
 <?php
 
-namespace benoitsan\AES;
+namespace AES;
 
 // The class uses the AES128 algorithm in CBC mode with PKCS#7 padding (128 means the IV has a fixed size of 128-bit).
 //

@@ -1,8 +1,8 @@
 <?php
 
-namespace benoitsan\AES\Tests;
+namespace AES;
 
-use benoitsan\AES\AES;
+use AES\AES;
 
 class AESTest extends \PHPUnit_Framework_TestCase
 {
